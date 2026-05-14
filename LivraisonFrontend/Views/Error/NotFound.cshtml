@@ -1,6 +1,10 @@
 <section class="error-panel">
     <div class="error-icon"><i class="bi bi-search"></i></div>
+    <p class="eyebrow mb-2">Erreur 404</p>
     <h1>Page introuvable</h1>
     <p>La ressource demandée n'existe pas ou n'est plus disponible.</p>
-    <a asp-controller="Colis" asp-action="Index" class="btn btn-primary">Retour à l'application</a>
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a asp-controller="Auth" asp-action="Login" class="btn btn-primary">Retour à l'application</a>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">Retour</a>
+    </div>
 </section>

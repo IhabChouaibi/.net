@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using LivraisonService.Data;
 using LivraisonService.Interfaces;
 using LivraisonService.Repositories;
@@ -83,6 +84,26 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("GlobalExceptionHandler");
+
+        logger.LogError(feature?.Error, "Unhandled exception in LivraisonService.");
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/problem+json";
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new
+        {
+            title = "Erreur interne du service",
+            status = context.Response.StatusCode,
+            message = "Une erreur inattendue est survenue côté serveur."
+        }));
+    });
+});
 
 if (app.Environment.IsDevelopment())
 {

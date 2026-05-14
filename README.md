@@ -58,9 +58,23 @@ Flux login :
    - `Role`
    - `Login`
    - `UserId`
+   - `ClientId`
 4. redirection :
    - `Admin` -> `/Dashboard/Index`
    - `User` -> `/SuiviColis/Index`
+
+Nouveau comportement :
+
+- la session est entièrement réhydratée après chaque login
+- `Logout` exécute `HttpContext.Session.Clear()`
+- le profil client reste accessible après logout/login
+- `SessionManager` et `AuthSessionHelper` exposent :
+  - `GetToken()`
+  - `GetRole()`
+  - `GetLogin()`
+  - `GetUserId()`
+  - `GetClientId()`
+  - `IsAuthenticated()`
 
 ## Fonctionnalités Admin
 
@@ -105,6 +119,62 @@ Nouveau support ajouté :
 - `PUT /clients/by-compte/{compteId}`
 - `POST /clients/register`
 - `GET /colis/client/{clientId}`
+
+## Gestion des exceptions
+
+Frontend :
+
+- gestion centralisée des erreurs API dans `ApiServiceBase`
+- prise en charge des erreurs :
+  - `401 Unauthorized`
+  - `403 Forbidden`
+  - `404 Not Found`
+  - `500 Internal Server Error`
+  - API indisponible
+  - timeout API
+  - token expiré
+  - erreur réseau
+  - réponse JSON invalide
+- pages premium :
+  - `Views/Error/Index.cshtml`
+  - `Views/Error/NotFound.cshtml`
+  - `Views/Error/AccessDenied.cshtml`
+  - `Views/Error/Unauthorized.cshtml`
+- feedback utilisateur via `SweetAlert2`
+
+Backend :
+
+- chaque microservice principal expose maintenant un `UseExceptionHandler(...)`
+- les erreurs non gérées retournent une réponse `application/problem+json`
+
+## Client sans colis
+
+- `SuiviColis` et `MesColis` ne plantent plus si le client n'a aucun colis
+- affichage d'un empty state premium avec icône, message et actions
+- message attendu :
+  - `Aucun colis disponible pour le moment`
+
+## Améliorations UX/UI
+
+- dashboard admin plus compact
+- cards plus petites, padding réduit, hover léger
+- formulaires renforcés :
+  - focus visuel
+  - placeholders cohérents
+  - meilleure grille responsive
+- tables premium :
+  - actions avec icônes Bootstrap
+  - tooltips
+  - spacing compact
+- `Select2` activé sur les dropdowns de création/édition colis
+
+## Création et édition de colis
+
+- le formulaire n'affiche plus uniquement `ClientId` et `LivreurId`
+- les listes déroulantes affichent :
+  - `Nom + Prenom` pour le client
+  - `Nom du livreur` pour le livreur
+- l'API continue de recevoir les identifiants numériques
 
 ## Design premium
 

@@ -3,7 +3,8 @@
 
 <section class="error-panel">
     <div class="error-icon"><i class="bi bi-shield-x"></i></div>
+    <p class="eyebrow mb-2">Erreur 403</p>
     <h1>Accès refusé</h1>
     <p>Votre rôle actuel ne permet pas d'accéder à cette ressource.</p>
-    <a asp-controller="@(SessionManager.IsAdmin ? "Dashboard" : "SuiviColis")" asp-action="Index" class="btn btn-primary">Retour à l'application</a>
+    <a asp-controller="@(SessionManager.IsAdmin ? "Dashboard" : "ClientHome")" asp-action="Index" class="btn btn-primary">Retour à l'application</a>
 </section>

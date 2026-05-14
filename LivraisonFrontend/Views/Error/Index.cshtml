@@ -1,6 +1,10 @@
 <section class="error-panel">
     <div class="error-icon"><i class="bi bi-exclamation-octagon"></i></div>
+    <p class="eyebrow mb-2">Erreur applicative</p>
     <h1>Une erreur est survenue</h1>
-    <p>Le frontend n'a pas pu terminer l'action demandée. Vérifiez la disponibilité de l'API Gateway et réessayez.</p>
-    <a asp-controller="Auth" asp-action="Login" class="btn btn-primary">Retour à la connexion</a>
+    <p>Le frontend n'a pas pu terminer l'action demandée. Vérifiez la disponibilité des services puis réessayez.</p>
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a asp-controller="Auth" asp-action="Login" class="btn btn-primary">Retour à la connexion</a>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">Retour</a>
+    </div>
 </section>

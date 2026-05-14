@@ -61,6 +61,8 @@ public class AuthService : IAuthService
             Message = "Compte cree avec succes.",
             Token = token,
             Id = compte.Id,
+            UserId = compte.Id,
+            CompteId = compte.Id,
             Login = compte.Login,
             Role = compte.Role,
             FullName = compte.FullName
@@ -85,6 +87,8 @@ public class AuthService : IAuthService
             Message = "Connexion reussie.",
             Token = GenerateJwtToken(compte),
             Id = compte.Id,
+            UserId = compte.Id,
+            CompteId = compte.Id,
             Login = compte.Login,
             Role = compte.Role,
             FullName = compte.FullName

@@ -10,6 +10,12 @@ public class AuthResponse
 
     public int Id { get; set; }
 
+    public int? UserId { get; set; }
+
+    public int? CompteId { get; set; }
+
+    public int? ClientId { get; set; }
+
     public string Login { get; set; } = string.Empty;
 
     public string Role { get; set; } = string.Empty;

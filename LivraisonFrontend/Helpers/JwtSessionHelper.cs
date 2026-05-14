@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using LivraisonFrontend.Models;
+using LivraisonFrontend.ViewModels;
 
 namespace LivraisonFrontend.Helpers;
 
@@ -12,18 +12,24 @@ public static class JwtSessionHelper
     public const string RoleKey = "Role";
     public const string FullNameKey = "FullName";
     public const string UserIdKey = "UserId";
+    public const string CompteIdKey = "CompteId";
+    public const string ClientIdKey = "ClientId";
     private const string LegacyTokenKey = "AuthToken";
     private const string LegacyLoginKey = "UserLogin";
     private const string LegacyRoleKey = "UserRole";
     private const string LegacyFullNameKey = "UserFullName";
 
-    public static void StoreUserSession(ISession session, AuthResponse response)
+    public static void StoreUserSession(ISession session, AuthResponseViewModel response)
     {
         session.SetString(TokenKey, response.Token);
         session.SetString(LoginKey, response.Login);
         session.SetString(RoleKey, response.Role);
         session.SetString(FullNameKey, response.FullName);
-        session.SetString(UserIdKey, response.Id.ToString());
+        session.SetString(UserIdKey, response.EffectiveUserId > 0 ? response.EffectiveUserId.ToString() : string.Empty);
+        session.SetString(CompteIdKey, response.CompteId.GetValueOrDefault() > 0
+            ? response.CompteId!.Value.ToString()
+            : response.EffectiveUserId > 0 ? response.EffectiveUserId.ToString() : string.Empty);
+        session.SetString(ClientIdKey, response.ClientId.GetValueOrDefault() > 0 ? response.ClientId!.Value.ToString() : string.Empty);
         session.SetString(LegacyTokenKey, response.Token);
         session.SetString(LegacyLoginKey, response.Login);
         session.SetString(LegacyRoleKey, response.Role);
@@ -37,6 +43,8 @@ public static class JwtSessionHelper
         session.Remove(RoleKey);
         session.Remove(FullNameKey);
         session.Remove(UserIdKey);
+        session.Remove(CompteIdKey);
+        session.Remove(ClientIdKey);
         session.Remove(LegacyTokenKey);
         session.Remove(LegacyLoginKey);
         session.Remove(LegacyRoleKey);
@@ -54,9 +62,15 @@ public static class JwtSessionHelper
     public static int GetUserId(ISession session)
         => int.TryParse(session.GetString(UserIdKey), out var userId) ? userId : 0;
 
+    public static int GetCompteId(ISession session)
+        => int.TryParse(session.GetString(CompteIdKey), out var compteId) ? compteId : 0;
+
+    public static int? GetClientId(ISession session)
+        => int.TryParse(session.GetString(ClientIdKey), out var clientId) ? clientId : null;
+
     public static bool HasToken(ISession session) => !string.IsNullOrWhiteSpace(GetToken(session));
 
-    public static IEnumerable<Claim> BuildClaims(AuthResponse response)
+    public static IEnumerable<Claim> BuildClaims(AuthResponseViewModel response)
     {
         var claims = ParseClaimsFromJwt(response.Token).ToList();
 

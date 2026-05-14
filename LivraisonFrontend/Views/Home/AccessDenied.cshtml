@@ -1,10 +1,17 @@
+@using LivraisonFrontend.Helpers
+@inject SessionManager SessionManager
 @{
     ViewData["Title"] = "Accès refusé";
+    var targetController = SessionManager.IsAdmin ? "Dashboard" : SessionManager.IsUser ? "ClientHome" : "Auth";
+    var targetAction = SessionManager.HasActiveSession ? "Index" : "Login";
 }
 
-<section class="surface-panel text-center">
+<section class="surface-panel error-panel">
+    <div class="error-icon"><i class="bi bi-shield-lock"></i></div>
     <p class="eyebrow mb-2">Accès refusé</p>
-    <h1 class="section-title mb-3">Vous n'avez pas accès à cette page.</h1>
-    <p class="text-muted mb-4">Votre session est valide, mais votre rôle ne permet pas d'ouvrir cette ressource.</p>
-    <a asp-controller="Auth" asp-action="Login" class="btn btn-outline-secondary">Retour à la connexion</a>
+    <h1 class="section-title mb-3">Cette page n'est pas accessible avec votre rôle.</h1>
+    <p class="text-muted mb-4">Les pages administrateur sont réservées au rôle Admin. Les pages client sont réservées au rôle User.</p>
+    <a asp-controller="@targetController" asp-action="@targetAction" class="btn btn-primary">
+        <i class="bi bi-arrow-left me-2"></i>Retour
+    </a>
 </section>

@@ -2,23 +2,23 @@
 
 <section class="auth-page auth-page-login">
     <div class="auth-showcase">
-        <p class="eyebrow text-white-50">Delivery Client Portal</p>
-        <h1 class="auth-hero-title">Pilotez vos colis, vos statuts et vos livraisons depuis un seul espace.</h1>
+        <p class="eyebrow text-white-50">Client & Admin Access</p>
+        <h1 class="auth-hero-title">Accédez à votre espace livraison avec une session stable et un suivi clair.</h1>
         <p class="auth-hero-copy">
-            Les administrateurs accèdent à la gestion complète. Les clients accèdent uniquement au suivi de leurs colis et à leur profil.
+            Les administrateurs pilotent la plateforme. Les utilisateurs suivent leurs colis, leur profil et leurs livraisons.
         </p>
         <div class="auth-stat-grid">
-            <div class="auth-stat-card"><strong>JWT</strong><span>Session sécurisée</span></div>
-            <div class="auth-stat-card"><strong>Gateway</strong><span>APIs centralisées</span></div>
-            <div class="auth-stat-card"><strong>Tracking</strong><span>Suivi en temps réel</span></div>
+            <div class="auth-stat-card"><strong>Session</strong><span>JWT stocké en session</span></div>
+            <div class="auth-stat-card"><strong>Tracking</strong><span>Timeline colis</span></div>
+            <div class="auth-stat-card"><strong>Accès</strong><span>Admin et User uniquement</span></div>
         </div>
     </div>
 
     <div class="auth-card-panel surface-panel">
         <div class="mb-4">
             <p class="eyebrow mb-2">Connexion</p>
-            <h2 class="section-title mb-2">Accéder à la plateforme</h2>
-            <p class="text-muted mb-0">Connectez-vous avec votre compte administrateur ou votre compte client.</p>
+            <h2 class="section-title mb-2">Se connecter</h2>
+            <p class="text-muted mb-0">Utilisez votre login et votre mot de passe pour accéder à votre espace.</p>
         </div>
 
         <form asp-controller="Auth" asp-action="Login" method="post" class="row g-3">

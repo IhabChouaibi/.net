@@ -24,7 +24,7 @@ public abstract class AppController : Controller
 
     protected IActionResult? RequireAuthenticatedAccess()
     {
-        if (SessionManager.IsAuthenticated)
+        if (SessionManager.HasActiveSession)
         {
             return null;
         }
@@ -79,7 +79,7 @@ public abstract class AppController : Controller
         {
             ShowError(exception.Message);
 
-            if (SessionManager.IsAuthenticated
+            if (SessionManager.HasActiveSession
                 && string.Equals(fallbackAction, "Login", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(fallbackController, "Auth", StringComparison.OrdinalIgnoreCase))
             {

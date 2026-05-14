@@ -5,9 +5,9 @@ namespace LivraisonFrontend.Interfaces;
 
 public interface IAuthApiService
 {
-    Task<AuthResponse> LoginAsync(LoginRequest request);
+    Task<AuthResponseViewModel> LoginAsync(LoginRequest request);
 
-    Task<AuthResponse> RegisterAsync(RegisterRequest request);
+    Task<AuthResponseViewModel> RegisterAsync(RegisterRequest request);
 
     Task<PagedResult<AccountModel>> GetAccountsAsync(SearchFilterViewModel filters);
 

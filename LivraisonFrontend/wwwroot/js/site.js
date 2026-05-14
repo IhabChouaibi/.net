@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener("click", function () {
-            sidebar.classList.toggle("show");
+            sidebar.classList.toggle("sidebar-open");
         });
     }
 
@@ -33,11 +33,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll("table[data-enhance='true']").forEach(function (table) {
         $(table).DataTable({
-            paging: false,
+            paging: true,
+            pageLength: 10,
+            lengthChange: false,
             info: false,
-            searching: false,
+            searching: true,
             ordering: true,
-            responsive: true
+            responsive: true,
+            language: {
+                search: "",
+                searchPlaceholder: "Rechercher...",
+                paginate: {
+                    previous: "Préc.",
+                    next: "Suiv."
+                },
+                zeroRecords: "Aucune donnée trouvée"
+            }
         });
     });
+
+    document.querySelectorAll("[data-bs-toggle='tooltip']").forEach(function (element) {
+        new bootstrap.Tooltip(element);
+    });
+
+    if (window.jQuery && $.fn.select2) {
+        $(".select2-premium").each(function () {
+            const placeholder = this.dataset.placeholder || "Sélectionner";
+            $(this).select2({
+                theme: "bootstrap-5",
+                width: "100%",
+                placeholder: placeholder
+            });
+        });
+    }
 });

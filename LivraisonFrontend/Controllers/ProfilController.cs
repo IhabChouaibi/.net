@@ -18,6 +18,12 @@ public class ProfilController : AppController
 
     public Task<IActionResult> Index() => ExecuteAsync(async () =>
     {
+        if (string.IsNullOrWhiteSpace(SessionManager.GetToken()))
+        {
+            ShowError("Votre session a expiré. Veuillez vous reconnecter.");
+            return RedirectToAction("Login", "Auth");
+        }
+
         var accessRedirect = RequireUserAccess();
         if (accessRedirect is not null)
         {
@@ -25,11 +31,11 @@ public class ProfilController : AppController
         }
 
         ViewData["Title"] = "Mon profil";
-        var profile = await _profilApiService.GetProfileAsync(SessionManager.UserId);
+        var profile = await LoadProfileAsync();
         if (profile is null)
         {
-            ShowError("Aucun profil client n'est lié à ce compte.");
-            return RedirectToAction("Login", "Auth");
+            ShowError("Profil client introuvable.");
+            return RedirectToAction("Index", "SuiviColis");
         }
 
         return View(MapToViewModel(profile));
@@ -37,6 +43,12 @@ public class ProfilController : AppController
 
     public Task<IActionResult> Edit() => ExecuteAsync(async () =>
     {
+        if (string.IsNullOrWhiteSpace(SessionManager.GetToken()))
+        {
+            ShowError("Votre session a expiré. Veuillez vous reconnecter.");
+            return RedirectToAction("Login", "Auth");
+        }
+
         var accessRedirect = RequireUserAccess();
         if (accessRedirect is not null)
         {
@@ -44,10 +56,10 @@ public class ProfilController : AppController
         }
 
         ViewData["Title"] = "Modifier mon profil";
-        var profile = await _profilApiService.GetProfileAsync(SessionManager.UserId);
+        var profile = await LoadProfileAsync();
         if (profile is null)
         {
-            ShowError("Aucun profil client n'est lié à ce compte.");
+            ShowError("Profil client introuvable.");
             return RedirectToAction(nameof(Index));
         }
 
@@ -58,6 +70,12 @@ public class ProfilController : AppController
     [ValidateAntiForgeryToken]
     public Task<IActionResult> Edit(ProfilViewModel viewModel) => ExecuteAsync(async () =>
     {
+        if (string.IsNullOrWhiteSpace(SessionManager.GetToken()))
+        {
+            ShowError("Votre session a expiré. Veuillez vous reconnecter.");
+            return RedirectToAction("Login", "Auth");
+        }
+
         var accessRedirect = RequireUserAccess();
         if (accessRedirect is not null)
         {
@@ -70,9 +88,18 @@ public class ProfilController : AppController
             return View(viewModel);
         }
 
-        await _profilApiService.UpdateProfileAsync(SessionManager.UserId, new ClientModel
+        var profile = await LoadProfileAsync();
+        if (profile is null)
         {
-            CompteId = SessionManager.UserId,
+            ShowError("Impossible de retrouver le profil client associé à cette session.");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var compteId = SessionManager.GetCompteId() > 0 ? SessionManager.GetCompteId() : SessionManager.UserId;
+        await _profilApiService.UpdateProfileAsync(compteId, new ClientModel
+        {
+            Id = profile.Id,
+            CompteId = compteId,
             Nom = viewModel.Nom,
             Prenom = viewModel.Prenom,
             Email = viewModel.Email,
@@ -86,6 +113,23 @@ public class ProfilController : AppController
         ShowSuccess("Profil mis à jour avec succès.");
         return RedirectToAction(nameof(Index));
     }, fallbackAction: nameof(Index));
+
+    private async Task<ClientModel?> LoadProfileAsync()
+    {
+        var compteId = SessionManager.GetCompteId() > 0 ? SessionManager.GetCompteId() : SessionManager.GetUserId();
+        if (compteId <= 0)
+        {
+            return null;
+        }
+
+        var profile = await _profilApiService.GetProfileAsync(compteId);
+        if (profile?.Id > 0)
+        {
+            SessionManager.SetClientId(profile.Id);
+        }
+
+        return profile;
+    }
 
     private ProfilViewModel MapToViewModel(ClientModel profile) => new()
     {

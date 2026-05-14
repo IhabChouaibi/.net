@@ -1,4 +1,4 @@
-@model ColisModel
+@model LivraisonFrontend.ViewModels.CreateColisViewModel
 
 <section class="surface-panel">
     <div class="panel-header">
@@ -8,10 +8,10 @@
         </div>
     </div>
 
-    <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="row g-4">
+    <form asp-action="Edit" asp-route-id="@Model.Colis.Id" method="post" class="row g-4">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
-        <input asp-for="Id" type="hidden" />
+        <input asp-for="Colis.Id" type="hidden" />
         <partial name="_Form" model="Model" />
         <div class="col-12 d-flex gap-2">
             <button type="submit" class="btn btn-primary">Mettre à jour</button>

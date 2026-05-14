@@ -12,7 +12,7 @@
     <form method="get" class="row g-3 align-items-end">
         <div class="col-lg-4">
             <label asp-for="Filters.SearchTerm" class="form-label"></label>
-            <input asp-for="Filters.SearchTerm" class="form-control" placeholder="Id, libellé ou statut" />
+            <input asp-for="Filters.SearchTerm" class="form-control" placeholder="Id colis, libellé ou statut" />
         </div>
         <div class="col-md-3 col-lg-2">
             <label asp-for="Filters.Status" class="form-label"></label>
@@ -87,9 +87,19 @@
     else
     {
         <div class="surface-panel empty-state-panel">
-            <i class="bi bi-inboxes empty-state-icon"></i>
-            <h3>Aucun colis trouvé</h3>
-            <p class="text-muted mb-0">Ajustez vos filtres ou vérifiez que votre compte client est bien lié à des colis.</p>
+            <div class="empty-state-art">
+                <i class="bi bi-box2-heart empty-state-icon"></i>
+            </div>
+            <h3>@Model.EmptyMessage</h3>
+            <p class="text-muted mb-4">@Model.EmptyDescription</p>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a asp-controller="ProfilClient" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-person-circle me-2"></i>Mon Profil
+                </a>
+                <a asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Actualiser
+                </a>
+            </div>
         </div>
     }
 </section>

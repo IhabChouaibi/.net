@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
@@ -40,6 +41,26 @@ builder.Services.AddAuthorization();
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("GlobalExceptionHandler");
+
+        logger.LogError(feature?.Error, "Unhandled exception in GatewayService.");
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/problem+json";
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new
+        {
+            title = "Erreur interne de la gateway",
+            status = context.Response.StatusCode,
+            message = "La gateway n'a pas pu traiter la requête."
+        }));
+    });
+});
 
 app.UseCors("AllowFrontend");
 app.UseAuthentication();

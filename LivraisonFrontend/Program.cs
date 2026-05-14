@@ -10,7 +10,6 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection(ApiSett
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = "LivraisonFrontend.Session";
@@ -19,18 +18,21 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
-
-builder.Services.AddAuthentication();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddAuthorization();
 
 builder.Services.AddTransient<ApiAuthorizationHandler>();
 builder.Services.AddScoped<SessionManager>();
 builder.Services.AddScoped<AuthSessionHelper>();
+builder.Services.AddScoped<ClientAccessGuard>();
+builder.Services.AddScoped<AdminAccessGuard>();
 
-builder.Services.AddHttpClient("GatewayClient", (serviceProvider, client) =>
+builder.Services.AddHttpClient("GatewayClient", (_, client) =>
     {
         var apiSettings = builder.Configuration.GetSection(ApiSettings.SectionName).Get<ApiSettings>() ?? new ApiSettings();
         client.BaseAddress = new Uri(apiSettings.GatewayBaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(20);
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
     })
@@ -45,26 +47,14 @@ builder.Services.AddScoped<IPaiementApiService, PaiementApiService>();
 builder.Services.AddScoped<ILivraisonApiService, LivraisonApiService>();
 builder.Services.AddScoped<IDashboardApiService, DashboardApiService>();
 builder.Services.AddScoped<IProfilApiService, ProfilApiService>();
+builder.Services.AddScoped<IProfilClientApiService, ProfilClientApiService>();
+builder.Services.AddScoped<ISuiviColisApiService, SuiviColisApiService>();
 
 var app = builder.Build();
 
-app.Lifetime.ApplicationStarted.Register(() =>
-{
-    var frontendUrls = app.Urls.Any()
-        ? string.Join(", ", app.Urls)
-        : builder.Configuration["ASPNETCORE_URLS"] ?? "non defini";
-
-    app.Logger.LogInformation("Frontend demarre sur: {FrontendUrls}", frontendUrls);
-    app.Logger.LogInformation(
-        "Port frontend attendu par launchSettings: HTTP http://localhost:5040, HTTPS https://localhost:7295");
-    app.Logger.LogInformation(
-        "GatewayBaseUrl configure pour les appels API: {GatewayBaseUrl}",
-        builder.Configuration.GetSection(ApiSettings.SectionName).Get<ApiSettings>()?.GatewayBaseUrl);
-});
-
+app.UseExceptionHandler("/Error");
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
@@ -73,10 +63,10 @@ if (!app.Environment.IsEnvironment("Docker"))
 {
     app.UseHttpsRedirection();
 }
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

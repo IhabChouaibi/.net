@@ -5,138 +5,132 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LivraisonFrontend.Controllers;
 
-public class SuiviColisController : AppController
+public class SuiviColisController : Controller
 {
-    private readonly IColisApiService _colisApiService;
-    private readonly ILivraisonApiService _livraisonApiService;
-    private readonly IProfilApiService _profilApiService;
-    private readonly ILogger<SuiviColisController> _logger;
+    private readonly ClientAccessGuard _clientAccessGuard;
+    private readonly AuthSessionHelper _authSessionHelper;
+    private readonly ISuiviColisApiService _suiviColisApiService;
+    private readonly IProfilClientApiService _profilClientApiService;
 
     public SuiviColisController(
-        IColisApiService colisApiService,
-        ILivraisonApiService livraisonApiService,
-        IProfilApiService profilApiService,
-        SessionManager sessionManager,
-        ILogger<SuiviColisController> logger)
-        : base(sessionManager)
+        ClientAccessGuard clientAccessGuard,
+        AuthSessionHelper authSessionHelper,
+        ISuiviColisApiService suiviColisApiService,
+        IProfilClientApiService profilClientApiService)
     {
-        _colisApiService = colisApiService;
-        _livraisonApiService = livraisonApiService;
-        _profilApiService = profilApiService;
-        _logger = logger;
+        _clientAccessGuard = clientAccessGuard;
+        _authSessionHelper = authSessionHelper;
+        _suiviColisApiService = suiviColisApiService;
+        _profilClientApiService = profilClientApiService;
     }
 
-    public Task<IActionResult> Index(SuiviColisFilterViewModel filters) => ExecuteAsync(async () =>
-    {
-        var token = HttpContext.Session.GetString("Token");
-        var role = HttpContext.Session.GetString("Role");
-        Console.WriteLine($"TOKEN={(string.IsNullOrWhiteSpace(token) ? "(null)" : "present")}");
-        Console.WriteLine($"ROLE={role ?? "(null)"}");
-        _logger.LogInformation(
-            "SuiviColis/Index. Token present: {HasToken}. Role: {Role}. Controller: SuiviColis. Action: Index.",
-            !string.IsNullOrWhiteSpace(token),
-            role ?? "(null)");
+    public Task<IActionResult> Index(SuiviColisFilterViewModel filters) =>
+        RenderListAsync(filters, "Suivi Colis", "Consultez la timeline et l'état de vos colis.", nameof(Index));
 
-        var accessRedirect = RequireUserAccess();
+    public Task<IActionResult> MesColis(SuiviColisFilterViewModel filters) =>
+        RenderListAsync(filters, "Mes Colis", "Retrouvez l'ensemble de vos colis dans un espace unique.", nameof(MesColis));
+
+    public async Task<IActionResult> Details(int id)
+    {
+        var accessRedirect = _clientAccessGuard.Guard(this);
         if (accessRedirect is not null)
         {
-            if (accessRedirect is RedirectToActionResult redirect)
-            {
-                Console.WriteLine($"REDIRECT TO={redirect.ControllerName}/{redirect.ActionName}");
-            }
             return accessRedirect;
         }
 
-        Console.WriteLine("REDIRECT TO=(none)");
-        ViewData["Title"] = "Suivi de colis";
-        return View(await BuildPageViewModelAsync(filters, "Suivi de colis", "Consultez l'état de vos livraisons"));
-    }, fallbackAction: "Login", fallbackController: "Auth");
-
-    public Task<IActionResult> MesColis(SuiviColisFilterViewModel filters) => ExecuteAsync(async () =>
-    {
-        var token = HttpContext.Session.GetString("Token");
-        var role = HttpContext.Session.GetString("Role");
-        Console.WriteLine($"TOKEN={(string.IsNullOrWhiteSpace(token) ? "(null)" : "present")}");
-        Console.WriteLine($"ROLE={role ?? "(null)"}");
-        _logger.LogInformation(
-            "SuiviColis/MesColis. Token present: {HasToken}. Role: {Role}. Controller: SuiviColis. Action: MesColis.",
-            !string.IsNullOrWhiteSpace(token),
-            role ?? "(null)");
-
-        var accessRedirect = RequireUserAccess();
-        if (accessRedirect is not null)
+        try
         {
-            if (accessRedirect is RedirectToActionResult redirect)
+            var clientId = await _profilClientApiService.ResolveClientIdAsync();
+            if (clientId.GetValueOrDefault() <= 0)
             {
-                Console.WriteLine($"REDIRECT TO={redirect.ControllerName}/{redirect.ActionName}");
+                TempData["Notification.Type"] = "info";
+                TempData["Notification.Title"] = "Information";
+                TempData["Notification.Message"] = "Profil introuvable.";
+                return RedirectToAction(nameof(Index));
             }
-            return accessRedirect;
-        }
 
-        Console.WriteLine("REDIRECT TO=(none)");
-        ViewData["Title"] = "Mes colis";
-        return View(await BuildPageViewModelAsync(filters, "Mes colis", "Retrouvez l'ensemble de vos colis et leur statut"));
-    }, fallbackAction: "Login", fallbackController: "Auth");
-
-    public Task<IActionResult> Details(int id) => ExecuteAsync(async () =>
-    {
-        var token = HttpContext.Session.GetString("Token");
-        var role = HttpContext.Session.GetString("Role");
-        Console.WriteLine($"TOKEN={(string.IsNullOrWhiteSpace(token) ? "(null)" : "present")}");
-        Console.WriteLine($"ROLE={role ?? "(null)"}");
-        _logger.LogInformation(
-            "SuiviColis/Details. Token present: {HasToken}. Role: {Role}. Controller: SuiviColis. Action: Details.",
-            !string.IsNullOrWhiteSpace(token),
-            role ?? "(null)");
-
-        var accessRedirect = RequireUserAccess();
-        if (accessRedirect is not null)
-        {
-            if (accessRedirect is RedirectToActionResult redirect)
+            var item = await _suiviColisApiService.GetClientColisDetailsAsync(id);
+            if (item is null)
             {
-                Console.WriteLine($"REDIRECT TO={redirect.ControllerName}/{redirect.ActionName}");
+                return RedirectToAction("NotFoundPage", "Error");
             }
-            return accessRedirect;
-        }
 
-        Console.WriteLine("REDIRECT TO=(none)");
-        var profile = await _profilApiService.GetProfileAsync(SessionManager.UserId);
-        if (profile is null || profile.Id <= 0)
+            ViewData["Title"] = $"Colis #{item.Id}";
+            return View(item);
+        }
+        catch (UnauthorizedAccessException)
         {
-            ShowError("Aucun profil client n'est lié à ce compte.");
+            _authSessionHelper.ClearSession();
+            return RedirectToAction("Login", "Auth");
+        }
+        catch (ApplicationException exception)
+        {
+            TempData["Notification.Type"] = "error";
+            TempData["Notification.Title"] = "Erreur";
+            TempData["Notification.Message"] = exception.Message;
             return RedirectToAction(nameof(Index));
         }
+    }
 
-        var colisItems = await LoadClientColisAsync(profile.Id);
-        var item = colisItems.FirstOrDefault(x => x.Id == id);
-        if (item is null)
-        {
-            return RedirectToAction("NotFoundPage", "Error");
-        }
-
-        ViewData["Title"] = $"Colis #{item.Id}";
-        return View(item);
-    }, fallbackAction: nameof(Index));
-
-    private async Task<SuiviColisPageViewModel> BuildPageViewModelAsync(
+    private async Task<IActionResult> RenderListAsync(
         SuiviColisFilterViewModel filters,
         string title,
-        string subtitle)
+        string subtitle,
+        string viewName)
     {
-        var profile = await _profilApiService.GetProfileAsync(SessionManager.UserId);
-        if (profile is null || profile.Id <= 0)
+        var accessRedirect = _clientAccessGuard.Guard(this);
+        if (accessRedirect is not null)
         {
-            ShowError("Aucun profil client n'est lié à ce compte.");
-            return new SuiviColisPageViewModel
+            return accessRedirect;
+        }
+
+        try
+        {
+            ViewData["Title"] = title;
+            var clientId = await _profilClientApiService.ResolveClientIdAsync();
+            var items = await _suiviColisApiService.GetClientColisAsync();
+            var filteredItems = ApplyFilters(items, filters);
+
+            var model = new SuiviColisPageViewModel
+            {
+                Title = title,
+                Subtitle = subtitle,
+                Filters = filters,
+                Items = filteredItems,
+                EmptyMessage = "Aucun colis disponible pour le moment",
+                EmptyDescription = clientId.GetValueOrDefault() <= 0
+                    ? "Votre compte est connecté, mais aucun profil client exploitable n'a encore été retrouvé."
+                    : filteredItems.Count == 0 && items.Count > 0
+                        ? "Aucun colis ne correspond à votre recherche actuelle."
+                        : "Vos futurs colis apparaîtront ici automatiquement."
+            };
+
+            return View(viewName, model);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _authSessionHelper.ClearSession();
+            return RedirectToAction("Login", "Auth");
+        }
+        catch (ApplicationException exception)
+        {
+            TempData["Notification.Type"] = "error";
+            TempData["Notification.Title"] = "Erreur";
+            TempData["Notification.Message"] = exception.Message;
+            return View(viewName, new SuiviColisPageViewModel
             {
                 Title = title,
                 Subtitle = subtitle,
                 Filters = filters
-            };
+            });
         }
+    }
 
-        var items = await LoadClientColisAsync(profile.Id);
-        var filteredItems = items
+    private static IReadOnlyList<SuiviColisItemViewModel> ApplyFilters(
+        IReadOnlyList<SuiviColisItemViewModel> items,
+        SuiviColisFilterViewModel filters)
+    {
+        return items
             .Where(item => string.IsNullOrWhiteSpace(filters.SearchTerm)
                            || item.Id.ToString().Contains(filters.SearchTerm, StringComparison.OrdinalIgnoreCase)
                            || item.Libelle.Contains(filters.SearchTerm, StringComparison.OrdinalIgnoreCase)
@@ -145,43 +139,9 @@ public class SuiviColisController : AppController
                            || string.Equals(item.Statut, filters.Status, StringComparison.OrdinalIgnoreCase))
             .Where(item => string.IsNullOrWhiteSpace(filters.Ville)
                            || item.Ville.Contains(filters.Ville, StringComparison.OrdinalIgnoreCase))
-            .Where(item => !filters.DateLivraison.HasValue || item.DateLivraison.Date == filters.DateLivraison.Value.Date)
+            .Where(item => !filters.DateLivraison.HasValue
+                           || item.DateLivraison.Date == filters.DateLivraison.Value.Date)
             .OrderByDescending(item => item.DateLivraison)
             .ToList();
-
-        return new SuiviColisPageViewModel
-        {
-            Title = title,
-            Subtitle = subtitle,
-            Filters = filters,
-            Items = filteredItems
-        };
-    }
-
-    private async Task<List<SuiviColisItemViewModel>> LoadClientColisAsync(int clientId)
-    {
-        var colis = await _colisApiService.GetByClientIdAsync(clientId);
-        var livraisons = await _livraisonApiService.GetAllAsync();
-
-        return colis.Select(item =>
-        {
-            var livraison = livraisons.FirstOrDefault(x => x.ColisId == item.Id);
-            return new SuiviColisItemViewModel
-            {
-                Id = item.Id,
-                Libelle = item.Libelle,
-                DateLivraison = item.DateLivraison,
-                Montant = item.Montant,
-                Poids = item.Poids,
-                Volume = item.Volume,
-                ClientId = item.ClientId,
-                LivreurId = item.LivreurId,
-                StatutLivraisonId = item.StatutLivraisonId,
-                Statut = item.StatutLivraisonLabel,
-                Adresse = livraison?.Adresse ?? "Adresse indisponible",
-                Ville = livraison?.Ville ?? "Ville indisponible",
-                CodePostal = livraison?.CodePostal ?? string.Empty
-            };
-        }).ToList();
     }
 }

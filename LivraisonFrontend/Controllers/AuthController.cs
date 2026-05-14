@@ -10,57 +10,33 @@ public class AuthController : AppController
 {
     private readonly IAuthApiService _authApiService;
     private readonly IClientApiService _clientApiService;
-    private readonly ILogger<AuthController> _logger;
+    private readonly AuthSessionHelper _authSessionHelper;
 
     public AuthController(
         IAuthApiService authApiService,
         IClientApiService clientApiService,
-        SessionManager sessionManager,
-        ILogger<AuthController> logger)
+        AuthSessionHelper authSessionHelper,
+        SessionManager sessionManager)
         : base(sessionManager)
     {
         _authApiService = authApiService;
         _clientApiService = clientApiService;
-        _logger = logger;
+        _authSessionHelper = authSessionHelper;
     }
 
     public IActionResult Login()
     {
-        var token = HttpContext.Session.GetString("Token");
-        var role = HttpContext.Session.GetString("Role");
-
-        Console.WriteLine($"TOKEN={(string.IsNullOrWhiteSpace(token) ? "(null)" : "present")}");
-        Console.WriteLine($"ROLE={role ?? "(null)"}");
-
-        _logger.LogInformation(
-            "GET Login. Token present: {HasToken}. Role: {Role}. Controller: Auth. Action: Login.",
-            !string.IsNullOrWhiteSpace(token),
-            role ?? "(null)");
-
-        if (!string.IsNullOrWhiteSpace(token) && string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
+        if (_authSessionHelper.IsAdmin())
         {
-            var redirectResult = RedirectToAction("Index", "Dashboard");
-            Console.WriteLine($"REDIRECT TO={redirectResult.ControllerName}/{redirectResult.ActionName}");
-            _logger.LogInformation(
-                "GET Login redirect -> {Controller}/{Action}",
-                redirectResult.ControllerName,
-                redirectResult.ActionName);
-            return redirectResult;
+            return RedirectToAction("Index", "Dashboard");
         }
 
-        if (!string.IsNullOrWhiteSpace(token) && string.Equals(role, "User", StringComparison.OrdinalIgnoreCase))
+        if (_authSessionHelper.IsUser())
         {
-            var redirectResult = RedirectToAction("Index", "SuiviColis");
-            Console.WriteLine($"REDIRECT TO={redirectResult.ControllerName}/{redirectResult.ActionName}");
-            _logger.LogInformation(
-                "GET Login redirect -> {Controller}/{Action}",
-                redirectResult.ControllerName,
-                redirectResult.ActionName);
-            return redirectResult;
+            return RedirectToAction("Index", "ClientHome");
         }
 
         ViewData["Title"] = "Connexion";
-        Console.WriteLine("REDIRECT TO=(none)");
         return View(new LoginViewModel());
     }
 
@@ -82,63 +58,57 @@ public class AuthController : AppController
                 Password = viewModel.Password
             });
 
-            if (string.IsNullOrWhiteSpace(response.Login))
+            response.Login = string.IsNullOrWhiteSpace(response.Login) ? viewModel.Login : response.Login;
+            response.Role = NormalizeRole(response.Role);
+            response.FullName = string.IsNullOrWhiteSpace(response.FullName)
+                ? response.Login
+                : response.FullName;
+
+            if (!string.Equals(response.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(response.Role, "User", StringComparison.OrdinalIgnoreCase))
             {
-                response.Login = viewModel.Login;
+                _authSessionHelper.ClearSession();
+                return RedirectToAction("AccessDenied", "Home");
             }
 
-            if (string.IsNullOrWhiteSpace(response.Role))
+            _authSessionHelper.SaveLoginSession(response);
+
+            if (_authSessionHelper.IsUser() && !_authSessionHelper.GetClientId().HasValue)
             {
-                response.Role = "User";
+                var compteId = _authSessionHelper.GetCompteId() ?? _authSessionHelper.GetUserId();
+                var resolvedCompteId = compteId.GetValueOrDefault();
+                if (resolvedCompteId > 0)
+                {
+                    var client = await _clientApiService.GetByCompteIdAsync(resolvedCompteId);
+                    if (client?.Id > 0)
+                    {
+                        _authSessionHelper.SetClientId(client.Id);
+                    }
+                }
             }
 
-            if (string.IsNullOrWhiteSpace(response.FullName))
-            {
-                response.FullName = response.Login;
-            }
-
-            HttpContext.Session.SetString("Token", response.Token);
-            HttpContext.Session.SetString("Role", response.Role);
-            HttpContext.Session.SetString("Login", response.Login);
-            HttpContext.Session.SetString("FullName", response.FullName);
-            HttpContext.Session.SetString("UserId", response.Id.ToString());
-            JwtSessionHelper.StoreUserSession(HttpContext.Session, response);
-
-            var redirectResult = string.Equals(response.Role, "Admin", StringComparison.OrdinalIgnoreCase)
-                ? RedirectToAction("Index", "Dashboard")
-                : RedirectToAction("Index", "SuiviColis");
-            Console.WriteLine($"TOKEN={(string.IsNullOrWhiteSpace(HttpContext.Session.GetString("Token")) ? "(null)" : "present")}");
-            Console.WriteLine($"ROLE={HttpContext.Session.GetString("Role") ?? "(null)"}");
-            Console.WriteLine($"REDIRECT TO={redirectResult.ControllerName}/{redirectResult.ActionName}");
-            _logger.LogInformation(
-                "POST Login. Token present: {HasToken}. Role: {Role}. Controller: Auth. Action: Login. Redirect -> {Controller}/{Action}",
-                !string.IsNullOrWhiteSpace(HttpContext.Session.GetString("Token")),
-                HttpContext.Session.GetString("Role"),
-                redirectResult.ControllerName,
-                redirectResult.ActionName);
-            _logger.LogInformation(
-                "Login reussi pour {Login}. Role recu: {Role}. Host frontend: {Host}",
-                response.Login,
-                response.Role,
-                Request.Host.Value);
             ShowSuccess("Connexion réussie.");
-            return redirectResult;
+            return _authSessionHelper.IsAdmin()
+                ? RedirectToAction("Index", "Dashboard")
+                : RedirectToAction("Index", "ClientHome");
         }
         catch (UnauthorizedAccessException exception)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
+            ViewData["Title"] = "Connexion";
             return View(viewModel);
         }
         catch (ApplicationException exception)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
+            ViewData["Title"] = "Connexion";
             return View(viewModel);
         }
     }
 
     public IActionResult Register()
     {
-        ViewData["Title"] = "Créer un compte";
+        ViewData["Title"] = "Créer un compte client";
         return View(new RegisterViewModel());
     }
 
@@ -148,7 +118,7 @@ public class AuthController : AppController
     {
         if (!ModelState.IsValid)
         {
-            ViewData["Title"] = "Créer un compte";
+            ViewData["Title"] = "Créer un compte client";
             return View(viewModel);
         }
 
@@ -166,11 +136,20 @@ public class AuthController : AppController
                 CodePostal = viewModel.CodePostal,
                 Login = viewModel.Login,
                 Password = viewModel.Password,
-                ConfirmPassword = viewModel.ConfirmPassword
+                ConfirmPassword = viewModel.ConfirmPassword,
+                Role = "User"
             });
+
+            var compteId = registerResponse.CompteId ?? registerResponse.UserId ?? registerResponse.Id;
+            var resolvedCompteId = compteId.GetValueOrDefault();
+            if (resolvedCompteId <= 0)
+            {
+                throw new ApplicationException("Le compte a été créé sans identifiant exploitable.");
+            }
+
             await _clientApiService.RegisterAsync(new ClientModel
             {
-                CompteId = registerResponse.Id,
+                CompteId = resolvedCompteId,
                 Nom = viewModel.Nom,
                 Prenom = viewModel.Prenom,
                 Email = viewModel.Email,
@@ -180,24 +159,34 @@ public class AuthController : AppController
                 Ville = viewModel.Ville,
                 CodePostal = viewModel.CodePostal
             });
-            ShowSuccess("Compte créé avec succès.");
+
+            ShowSuccess("Compte client créé avec succès. Connectez-vous pour continuer.");
             return RedirectToAction(nameof(Login));
         }
         catch (ApplicationException exception)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
+            ViewData["Title"] = "Créer un compte client";
             return View(viewModel);
         }
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
-        await ClearAuthenticationAsync();
-        _logger.LogInformation("Utilisateur deconnecte depuis le host frontend {Host}.", Request.Host.Value);
+        _authSessionHelper.ClearSession();
         ShowInfo("Vous êtes maintenant déconnecté.");
         return RedirectToAction(nameof(Login));
     }
 
+    private static string NormalizeRole(string? role)
+    {
+        if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Admin";
+        }
+
+        return "User";
+    }
 }

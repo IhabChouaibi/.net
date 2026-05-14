@@ -105,7 +105,7 @@ public class AccountsController : AppController
             });
             await _clientApiService.RegisterAsync(new ClientModel
             {
-                CompteId = registerResponse.Id,
+                CompteId = registerResponse.CompteId ?? registerResponse.UserId ?? registerResponse.EffectiveUserId,
                 Nom = viewModel.Nom,
                 Prenom = viewModel.Prenom,
                 Email = viewModel.Email,

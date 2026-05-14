@@ -29,55 +29,79 @@ public abstract class ApiServiceBase
 
     protected async Task<T?> GetAsync<T>(string endpoint)
     {
-        using var response = await CreateClient().GetAsync(endpoint);
-        var content = await ReadAndEnsureSuccessAsync(response, endpoint);
-        return DeserializeObject<T>(content);
+        return await ExecuteApiCallAsync(async () =>
+        {
+            using var response = await CreateClient().GetAsync(endpoint);
+            var content = await ReadAndEnsureSuccessAsync(response, endpoint);
+            return DeserializeObject<T>(content);
+        }, endpoint);
     }
 
     protected async Task<T?> GetOptionalAsync<T>(string endpoint)
     {
-        using var response = await CreateClient().GetAsync(endpoint);
-
-        if (response.StatusCode == HttpStatusCode.NotFound)
+        return await ExecuteApiCallAsync(async () =>
         {
-            Logger.LogInformation("Optional API resource not found on {Endpoint}.", endpoint);
-            return default;
-        }
+            using var response = await CreateClient().GetAsync(endpoint);
 
-        var content = await ReadAndEnsureSuccessAsync(response, endpoint);
-        return DeserializeObject<T>(content);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                Logger.LogInformation("Optional API resource not found on {Endpoint}.", endpoint);
+                return default;
+            }
+
+            var content = await ReadAndEnsureSuccessAsync(response, endpoint);
+            return DeserializeObject<T>(content);
+        }, endpoint);
     }
 
     protected async Task<PagedResult<T>> GetPagedAsync<T>(string endpoint, SearchFilterViewModel filters)
     {
-        using var response = await CreateClient().GetAsync(endpoint);
-        var content = await ReadAndEnsureSuccessAsync(response, endpoint);
-        return DeserializePagedResult<T>(content, filters);
+        return await ExecuteApiCallAsync(async () =>
+        {
+            using var response = await CreateClient().GetAsync(endpoint);
+            var content = await ReadAndEnsureSuccessAsync(response, endpoint);
+            return DeserializePagedResult<T>(content, filters);
+        }, endpoint);
     }
 
     protected async Task PostAsync<TRequest>(string endpoint, TRequest payload)
     {
-        using var response = await CreateClient().PostAsync(endpoint, BuildJsonContent(payload));
-        await ReadAndEnsureSuccessAsync(response, endpoint);
+        await ExecuteApiCallAsync(async () =>
+        {
+            using var response = await CreateClient().PostAsync(endpoint, BuildJsonContent(payload));
+            await ReadAndEnsureSuccessAsync(response, endpoint);
+            return true;
+        }, endpoint);
     }
 
     protected async Task<TResponse> PostAsync<TRequest, TResponse>(string endpoint, TRequest payload)
     {
-        using var response = await CreateClient().PostAsync(endpoint, BuildJsonContent(payload));
-        var content = await ReadAndEnsureSuccessAsync(response, endpoint);
-        return DeserializeObject<TResponse>(content) ?? throw new ApplicationException("Réponse API vide.");
+        return await ExecuteApiCallAsync(async () =>
+        {
+            using var response = await CreateClient().PostAsync(endpoint, BuildJsonContent(payload));
+            var content = await ReadAndEnsureSuccessAsync(response, endpoint);
+            return DeserializeObject<TResponse>(content) ?? throw new ApplicationException("Réponse API vide.");
+        }, endpoint);
     }
 
     protected async Task PutAsync<TRequest>(string endpoint, TRequest payload)
     {
-        using var response = await CreateClient().PutAsync(endpoint, BuildJsonContent(payload));
-        await ReadAndEnsureSuccessAsync(response, endpoint);
+        await ExecuteApiCallAsync(async () =>
+        {
+            using var response = await CreateClient().PutAsync(endpoint, BuildJsonContent(payload));
+            await ReadAndEnsureSuccessAsync(response, endpoint);
+            return true;
+        }, endpoint);
     }
 
     protected async Task DeleteAsync(string endpoint)
     {
-        using var response = await CreateClient().DeleteAsync(endpoint);
-        await ReadAndEnsureSuccessAsync(response, endpoint);
+        await ExecuteApiCallAsync(async () =>
+        {
+            using var response = await CreateClient().DeleteAsync(endpoint);
+            await ReadAndEnsureSuccessAsync(response, endpoint);
+            return true;
+        }, endpoint);
     }
 
     protected static string BuildQueryString(SearchFilterViewModel filters)
@@ -117,7 +141,7 @@ public abstract class ApiServiceBase
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             Logger.LogWarning("Unauthorized API call on {Endpoint}.", endpoint);
-            throw new UnauthorizedAccessException("Votre session a expiré. Veuillez vous reconnecter.");
+            throw new UnauthorizedAccessException("Authentification refusée. Veuillez vous reconnecter.");
         }
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
@@ -134,6 +158,34 @@ public abstract class ApiServiceBase
         var errorMessage = ExtractErrorMessage(content);
         Logger.LogError("API call failed on {Endpoint} with status {StatusCode}. Message: {Message}", endpoint, response.StatusCode, errorMessage);
         throw new ApplicationException(errorMessage);
+    }
+
+    private async Task<T> ExecuteApiCallAsync<T>(Func<Task<T>> action, string endpoint)
+    {
+        try
+        {
+            return await action();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            throw;
+        }
+        catch (TaskCanceledException exception)
+        {
+            // Surface gateway and microservice timeouts as a user-facing application error.
+            Logger.LogError(exception, "API timeout on {Endpoint}.", endpoint);
+            throw new ApplicationException("Service indisponible. Le délai de réponse est dépassé.");
+        }
+        catch (HttpRequestException exception)
+        {
+            Logger.LogError(exception, "HTTP request failure on {Endpoint}.", endpoint);
+            throw new ApplicationException("Service indisponible. L'API Gateway est inaccessible.");
+        }
+        catch (JsonException exception)
+        {
+            Logger.LogError(exception, "Invalid JSON returned by {Endpoint}.", endpoint);
+            throw new ApplicationException("La réponse du service distant est invalide.");
+        }
     }
 
     private static T? DeserializeObject<T>(string json)

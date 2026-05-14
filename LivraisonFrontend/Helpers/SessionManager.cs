@@ -1,3 +1,5 @@
+using LivraisonFrontend.ViewModels;
+
 namespace LivraisonFrontend.Helpers;
 
 public class SessionManager
@@ -14,10 +16,12 @@ public class SessionManager
 
     public string Token => JwtSessionHelper.GetToken(Session);
     public int UserId => JwtSessionHelper.GetUserId(Session);
+    public int CompteId => JwtSessionHelper.GetCompteId(Session);
+    public int? ClientId => JwtSessionHelper.GetClientId(Session);
     public string Login => JwtSessionHelper.GetLogin(Session);
     public string Role => JwtSessionHelper.GetRole(Session);
     public string FullName => JwtSessionHelper.GetFullName(Session);
-    public bool IsAuthenticated => JwtSessionHelper.HasToken(Session);
+    public bool HasActiveSession => JwtSessionHelper.HasToken(Session);
     public bool IsAdmin => string.Equals(Role, "Admin", StringComparison.OrdinalIgnoreCase);
     public bool IsUser => string.Equals(Role, "User", StringComparison.OrdinalIgnoreCase);
 
@@ -25,9 +29,25 @@ public class SessionManager
     public string GetRole() => Role;
     public string GetLogin() => Login;
     public int GetUserId() => UserId;
-    public bool IsAuthenticatedUser() => IsAuthenticated;
+    public int GetCompteId() => CompteId;
+    public int? GetClientId() => ClientId;
+    public bool IsAuthenticated() => HasActiveSession;
+    public bool IsAuthenticatedUser() => HasActiveSession;
     public bool IsAdminUser() => IsAdmin;
     public bool IsUserClient() => IsUser;
+
+    public void Store(AuthResponseViewModel response) => JwtSessionHelper.StoreUserSession(Session, response);
+
+    public void SetClientId(int? clientId)
+    {
+        if (clientId.GetValueOrDefault() > 0)
+        {
+            Session.SetString(JwtSessionHelper.ClientIdKey, clientId!.Value.ToString());
+            return;
+        }
+
+        Session.Remove(JwtSessionHelper.ClientIdKey);
+    }
 
     public void Clear() => JwtSessionHelper.Clear(Session);
 }

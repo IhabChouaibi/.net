@@ -7,7 +7,7 @@ namespace LivraisonFrontend.Controllers;
 public class ErrorController : Controller
 {
     [Route("Error")]
-    public IActionResult Index() => View();
+    public IActionResult Index() => View("Index");
 
     public IActionResult UnauthorizedPage() => View("Unauthorized");
 

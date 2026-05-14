@@ -60,10 +60,23 @@ Le frontend consomme uniquement la Gateway définie dans :
 ## Sécurité et session
 
 - JWT stocké dans `Session`
-- login, rôle et nom stockés en session
+- login, rôle, nom, `UserId` et `ClientId` stockés en session
 - `ApiAuthorizationHandler` ajoute automatiquement `Bearer {token}` à chaque appel API
-- middleware `SessionTokenValidationMiddleware` redirige vers `Login` si le token de session est absent
-- autorisation par rôle avec politique `AdminOnly`
+- `SessionManager` et `AuthSessionHelper` centralisent la lecture de session
+- `Logout` vide complètement la session ASP.NET Core
+
+## Robustesse et UX
+
+- empty state premium pour un client sans colis
+- profil client robuste après logout/login
+- gestion globale des erreurs API :
+  - API indisponible
+  - timeout
+  - token expiré
+  - erreurs HTTP 401/403/404/500
+- pages d'erreur Razor dédiées
+- `Select2` pour la sélection client/livreur dans les formulaires colis
+- dashboard admin plus compact et plus dense
 
 ## Bibliothèques utilisées
 
