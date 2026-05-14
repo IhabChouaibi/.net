@@ -1,0 +1,12 @@
+@model string
+@{
+    var value = string.IsNullOrWhiteSpace(Model) ? "N/A" : Model;
+    var badgeClass = value.ToLowerInvariant() switch
+    {
+        "actif" or "active" or "livré" or "livree" or "paid" or "payé" or "terminé" or "livrée" or "disponible" => "text-bg-success",
+        "en attente" or "pending" or "planifiée" or "planifiee" => "text-bg-warning",
+        "annulé" or "annule" or "rejected" or "bloqué" or "blocked" => "text-bg-danger",
+        _ => "text-bg-primary"
+    };
+}
+<span class="badge rounded-pill @badgeClass badge-soft">@value</span>

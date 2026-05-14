@@ -1,0 +1,32 @@
+@using LivraisonFrontend.Helpers
+@inject SessionManager SessionManager
+@model ColisModel
+
+<section class="surface-panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow mb-1">Consultation</p>
+            <h2 class="section-title">Détails du colis</h2>
+        </div>
+    </div>
+
+    <dl class="details-grid">
+        <div><dt>Id</dt><dd>@Model.Id</dd></div>
+        <div><dt>Libellé</dt><dd>@Model.Libelle</dd></div>
+        <div><dt>Date livraison</dt><dd>@Model.DateLivraison.ToString("dd/MM/yyyy")</dd></div>
+        <div><dt>Montant</dt><dd>@Model.Montant.ToString("N2") DT</dd></div>
+        <div><dt>Poids</dt><dd>@Model.Poids</dd></div>
+        <div><dt>Volume</dt><dd>@Model.Volume</dd></div>
+        <div><dt>Client</dt><dd>#@Model.ClientId</dd></div>
+        <div><dt>Livreur</dt><dd>#@Model.LivreurId</dd></div>
+        <div><dt>Statut</dt><dd><partial name="_StatusBadge" model="Model.StatutLivraisonLabel" /></dd></div>
+    </dl>
+
+    <div class="d-flex gap-2 mt-4">
+        @if (SessionManager.IsAdmin)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Modifier</a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">Retour</a>
+    </div>
+</section>

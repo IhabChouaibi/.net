@@ -1,5 +1,47 @@
-bin/
-obj/
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# Packages
 /packages/
+*.nupkg
+*.snupkg
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+*.iml
 riderModule.iml
-/_ReSharper.Caches/
+
+# ReSharper / Rider
+_ReSharper.Caches/
+*.DotSettings.user
+
+# Logs
+*.log
+logs/
+
+# Environment / secrets
+.env
+.env.*
+appsettings.Local.json
+appsettings.*.local.json
+
+# Frontend dependencies / generated assets
+**/node_modules/
+**/dist/
+**/.cache/
+
+# OS files
+.DS_Store
+Thumbs.db

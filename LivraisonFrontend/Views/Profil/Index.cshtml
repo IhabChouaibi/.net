@@ -1,0 +1,36 @@
+@model LivraisonFrontend.ViewModels.ProfilViewModel
+
+<section class="profile-shell">
+    <article class="surface-panel profile-summary-card">
+        <div class="profile-avatar-wrap">
+            <i class="bi bi-person-circle"></i>
+        </div>
+        <div>
+            <p class="eyebrow mb-1">Profil client</p>
+            <h2 class="section-title mb-1">@Model.Prenom @Model.Nom</h2>
+            <p class="text-muted mb-0">@Model.Login</p>
+        </div>
+        <a asp-action="Edit" class="btn btn-primary ms-auto"><i class="bi bi-pencil-square me-2"></i>Modifier</a>
+    </article>
+
+    <section class="surface-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow mb-1">Informations personnelles</p>
+                <h3 class="section-title">Mon profil</h3>
+            </div>
+        </div>
+
+        <dl class="details-grid">
+            <div><dt>Nom</dt><dd>@Model.Nom</dd></div>
+            <div><dt>Prénom</dt><dd>@Model.Prenom</dd></div>
+            <div><dt>Email</dt><dd>@Model.Email</dd></div>
+            <div><dt>Téléphone</dt><dd>@Model.Telephone</dd></div>
+            <div><dt>CIN</dt><dd>@Model.CIN</dd></div>
+            <div><dt>Login</dt><dd>@Model.Login</dd></div>
+            <div><dt>Adresse</dt><dd>@Model.Adresse</dd></div>
+            <div><dt>Ville</dt><dd>@Model.Ville</dd></div>
+            <div><dt>Code postal</dt><dd>@Model.CodePostal</dd></div>
+        </dl>
+    </section>
+</section>

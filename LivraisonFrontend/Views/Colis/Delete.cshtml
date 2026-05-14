@@ -1,0 +1,24 @@
+@model ColisModel
+
+<section class="surface-panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow mb-1">Suppression</p>
+            <h2 class="section-title">Supprimer le colis</h2>
+        </div>
+    </div>
+
+    <p class="text-muted">Vérifiez le colis avant de confirmer.</p>
+    <dl class="details-grid mb-4">
+        <div><dt>Libellé</dt><dd>@Model.Libelle</dd></div>
+        <div><dt>Client</dt><dd>#@Model.ClientId</dd></div>
+        <div><dt>Livreur</dt><dd>#@Model.LivreurId</dd></div>
+        <div><dt>Statut</dt><dd>@Model.StatutLivraisonLabel</dd></div>
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm-delete>
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+    </form>
+</section>

@@ -1,0 +1,23 @@
+@model LivraisonModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Adresse" class="form-label"></label>
+        <input asp-for="Adresse" class="form-control" placeholder="Adresse de livraison" />
+        <span asp-validation-for="Adresse" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Ville" class="form-label"></label>
+        <input asp-for="Ville" class="form-control" placeholder="Tunis" />
+        <span asp-validation-for="Ville" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CodePostal" class="form-label"></label>
+        <input asp-for="CodePostal" class="form-control" placeholder="1000" />
+        <span asp-validation-for="CodePostal" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ColisId" class="form-label"></label>
+        <input asp-for="ColisId" class="form-control" />
+    </div>
+</div>

@@ -1,0 +1,67 @@
+@model CrudPageViewModel<PaiementModel>
+
+<section class="surface-panel">
+    <div class="panel-header flex-wrap gap-3">
+        <div><p class="eyebrow mb-1">Module</p><h2 class="section-title">@Model.ModuleName</h2></div>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>@Model.CreateActionLabel</a>
+    </div>
+
+    <form method="get" class="row g-3 filter-bar">
+        <div class="col-md-5"><input type="text" name="SearchTerm" value="@Model.Filters.SearchTerm" class="form-control" placeholder="@Model.SearchPlaceholder" /></div>
+        <div class="col-md-3">
+            <select name="SortBy" class="form-select">
+                <option value="DatePaiement" selected="@(Model.Filters.SortBy == "DatePaiement")">Date</option>
+                <option value="Montant" selected="@(Model.Filters.SortBy == "Montant")">Montant</option>
+                <option value="ModePaiement" selected="@(Model.Filters.SortBy == "ModePaiement")">Mode</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="PageSize" class="form-select">
+                <option value="10" selected="@(Model.Filters.PageSize == 10)">10</option>
+                <option value="20" selected="@(Model.Filters.PageSize == 20)">20</option>
+                <option value="50" selected="@(Model.Filters.PageSize == 50)">50</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-grid"><button type="submit" class="btn btn-outline-primary"><i class="bi bi-search me-2"></i>Filtrer</button></div>
+    </form>
+
+    <div class="table-responsive mt-3">
+        <table class="table premium-table align-middle mb-0">
+            <thead><tr><th>Id</th><th>Montant</th><th>Mode</th><th>Colis</th><th>Date</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @if (Model.Data.Items.Any())
+            {
+                @foreach (var item in Model.Data.Items)
+                {
+                    <tr>
+                        <td class="fw-semibold">#@item.Id</td>
+                        <td>@item.Montant.ToString("N2") DT</td>
+                        <td>@item.ModePaiement</td>
+                        <td>#@item.ColisId</td>
+                        <td>@item.DatePaiement.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center text-muted py-4">Aucun paiement trouvé.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-bar">
+        <span class="text-muted small">Page @Model.Data.Page sur @Model.Data.TotalPages</span>
+        <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-secondary @(Model.Data.HasPreviousPage ? "" : "disabled")" asp-action="Index" asp-route-SearchTerm="@Model.Filters.SearchTerm" asp-route-SortBy="@Model.Filters.SortBy" asp-route-Page="@(Model.Data.Page - 1)" asp-route-PageSize="@Model.Filters.PageSize">Précédent</a>
+            <a class="btn btn-sm btn-outline-secondary @(Model.Data.HasNextPage ? "" : "disabled")" asp-action="Index" asp-route-SearchTerm="@Model.Filters.SearchTerm" asp-route-SortBy="@Model.Filters.SortBy" asp-route-Page="@(Model.Data.Page + 1)" asp-route-PageSize="@Model.Filters.PageSize">Suivant</a>
+        </div>
+    </div>
+</section>

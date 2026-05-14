@@ -1,0 +1,17 @@
+@model AccountModel
+
+<section class="surface-panel">
+    <div class="panel-header"><div><p class="eyebrow mb-1">Administration</p><h2 class="section-title">Supprimer le compte</h2></div></div>
+    <p class="text-muted">Cette action supprime définitivement le compte côté backend.</p>
+    <dl class="details-grid mb-4">
+        <div><dt>Nom</dt><dd>@Model.Prenom @Model.Nom</dd></div>
+        <div><dt>Login</dt><dd>@Model.Login</dd></div>
+        <div><dt>Email</dt><dd>@Model.Email</dd></div>
+        <div><dt>Rôle</dt><dd>@Model.Role</dd></div>
+    </dl>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm-delete>
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+    </form>
+</section>

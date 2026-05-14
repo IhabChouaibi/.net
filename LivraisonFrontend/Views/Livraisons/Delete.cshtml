@@ -1,0 +1,41 @@
+@model LivraisonModel
+
+<section class="surface-panel">
+    
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow mb-1">Suppression</p>
+            <h2 class="section-title">Supprimer la livraison</h2>
+        </div>
+    </div>
+
+    <p class="text-muted">
+        La suppression retirera cette adresse de livraison.
+    </p>
+
+    <dl class="details-grid mb-4">
+        <dt>Adresse</dt>
+        <dd>@Model.Adresse</dd>
+
+        <dt>Ville</dt>
+        <dd>@Model.Ville</dd>
+
+        <dt>Colis</dt>
+        <dd>#@Model.ColisId</dd>
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm-delete>
+        
+        @Html.AntiForgeryToken()
+
+        <button type="submit" class="btn btn-danger">
+            Confirmer la suppression
+        </button>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Annuler
+        </a>
+
+    </form>
+
+</section>

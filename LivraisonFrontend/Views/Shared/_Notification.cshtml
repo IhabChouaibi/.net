@@ -1,0 +1,23 @@
+@{
+    var notificationType = TempData["Notification.Type"]?.ToString();
+    var notificationTitle = TempData["Notification.Title"]?.ToString();
+    var notificationMessage = TempData["Notification.Message"]?.ToString();
+}
+
+@if (!string.IsNullOrWhiteSpace(notificationType) && !string.IsNullOrWhiteSpace(notificationMessage))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "@notificationType",
+                title: "@notificationTitle",
+                text: "@notificationMessage",
+                showConfirmButton: false,
+                timer: 3200,
+                timerProgressBar: true
+            });
+        });
+    </script>
+}

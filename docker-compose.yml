@@ -1,0 +1,156 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: livraison-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -Q 'SELECT 1' || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 25s
+
+  authservice:
+    build:
+      context: .
+      dockerfile: Backend/AuthService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=AuthDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7001:8080"
+
+  clientservice:
+    build:
+      context: .
+      dockerfile: Backend/ClientService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=ClientDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7002:8080"
+
+  livreurservice:
+    build:
+      context: .
+      dockerfile: Backend/LivreurService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=LivreurDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7003:8080"
+
+  colisservice:
+    build:
+      context: .
+      dockerfile: Backend/ColisService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=ColisDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7004:8080"
+
+  vehiculeservice:
+    build:
+      context: .
+      dockerfile: Backend/VehiculeService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=VehiculeDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7005:8080"
+
+  paiementservice:
+    build:
+      context: .
+      dockerfile: Backend/PaiementService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=PaiementDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7006:8080"
+
+  livraisonservice:
+    build:
+      context: .
+      dockerfile: Backend/LivraisonService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=LivraisonDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7007:8080"
+
+  dashboardservice:
+    build:
+      context: .
+      dockerfile: Backend/DashboardService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+    depends_on:
+      - clientservice
+      - livreurservice
+      - colisservice
+      - paiementservice
+    ports:
+      - "7008:8080"
+
+  gatewayservice:
+    build:
+      context: .
+      dockerfile: Backend/GatewayService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+    depends_on:
+      - authservice
+      - clientservice
+      - livreurservice
+      - colisservice
+      - vehiculeservice
+      - paiementservice
+      - livraisonservice
+      - dashboardservice
+    ports:
+      - "7000:8080"
+
+  livraisonfrontend:
+    build:
+      context: .
+      dockerfile: LivraisonFrontend/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+    depends_on:
+      - gatewayservice
+    ports:
+      - "7010:8080"
+
+volumes:
+  sqlserver_data:

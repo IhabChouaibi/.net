@@ -1,0 +1,55 @@
+@model LoginViewModel
+
+<section class="auth-page auth-page-login">
+    <div class="auth-showcase">
+        <p class="eyebrow text-white-50">Delivery Client Portal</p>
+        <h1 class="auth-hero-title">Pilotez vos colis, vos statuts et vos livraisons depuis un seul espace.</h1>
+        <p class="auth-hero-copy">
+            Les administrateurs accèdent à la gestion complète. Les clients accèdent uniquement au suivi de leurs colis et à leur profil.
+        </p>
+        <div class="auth-stat-grid">
+            <div class="auth-stat-card"><strong>JWT</strong><span>Session sécurisée</span></div>
+            <div class="auth-stat-card"><strong>Gateway</strong><span>APIs centralisées</span></div>
+            <div class="auth-stat-card"><strong>Tracking</strong><span>Suivi en temps réel</span></div>
+        </div>
+    </div>
+
+    <div class="auth-card-panel surface-panel">
+        <div class="mb-4">
+            <p class="eyebrow mb-2">Connexion</p>
+            <h2 class="section-title mb-2">Accéder à la plateforme</h2>
+            <p class="text-muted mb-0">Connectez-vous avec votre compte administrateur ou votre compte client.</p>
+        </div>
+
+        <form asp-controller="Auth" asp-action="Login" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+            <div class="col-12">
+                <label asp-for="Login" class="form-label"></label>
+                <input asp-for="Login" class="form-control form-control-lg" placeholder="Votre login" />
+                <span asp-validation-for="Login" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control form-control-lg" placeholder="Votre mot de passe" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12 d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
+                </button>
+            </div>
+
+            <div class="col-12 text-center">
+                <a asp-action="Register" class="auth-link">Créer un compte client</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

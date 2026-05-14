@@ -1,0 +1,66 @@
+@model CrudPageViewModel<AccountModel>
+
+<section class="surface-panel">
+    <div class="panel-header flex-wrap gap-3">
+        <div><p class="eyebrow mb-1">Administration</p><h2 class="section-title">@Model.ModuleName</h2></div>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>@Model.CreateActionLabel</a>
+    </div>
+
+    <form method="get" class="row g-3 filter-bar">
+        <div class="col-md-5"><input type="text" name="SearchTerm" value="@Model.Filters.SearchTerm" class="form-control" placeholder="@Model.SearchPlaceholder" /></div>
+        <div class="col-md-3">
+            <select name="Status" class="form-select">
+                <option value="">Tous les rôles</option>
+                <option value="Admin" selected="@(Model.Filters.Status == "Admin")">Admin</option>
+                <option value="User" selected="@(Model.Filters.Status == "User")">User</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="PageSize" class="form-select">
+                <option value="10" selected="@(Model.Filters.PageSize == 10)">10</option>
+                <option value="20" selected="@(Model.Filters.PageSize == 20)">20</option>
+                <option value="50" selected="@(Model.Filters.PageSize == 50)">50</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-grid"><button type="submit" class="btn btn-outline-primary"><i class="bi bi-search me-2"></i>Filtrer</button></div>
+    </form>
+
+    <div class="table-responsive mt-3">
+        <table class="table premium-table align-middle mb-0">
+            <thead><tr><th>Id</th><th>Nom</th><th>Login</th><th>Rôle</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @if (Model.Data.Items.Any())
+            {
+                @foreach (var item in Model.Data.Items)
+                {
+                    <tr>
+                        <td class="fw-semibold">#@item.Id</td>
+                        <td>@item.Prenom @item.Nom</td>
+                        <td>@item.Login</td>
+                        <td><partial name="_StatusBadge" model="item.Role" /></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="5" class="text-center text-muted py-4">Aucun compte trouvé.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-bar">
+        <span class="text-muted small">Page @Model.Data.Page sur @Model.Data.TotalPages</span>
+        <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-secondary @(Model.Data.HasPreviousPage ? "" : "disabled")" asp-action="Index" asp-route-SearchTerm="@Model.Filters.SearchTerm" asp-route-Status="@Model.Filters.Status" asp-route-Page="@(Model.Data.Page - 1)" asp-route-PageSize="@Model.Filters.PageSize">Précédent</a>
+            <a class="btn btn-sm btn-outline-secondary @(Model.Data.HasNextPage ? "" : "disabled")" asp-action="Index" asp-route-SearchTerm="@Model.Filters.SearchTerm" asp-route-Status="@Model.Filters.Status" asp-route-Page="@(Model.Data.Page + 1)" asp-route-PageSize="@Model.Filters.PageSize">Suivant</a>
+        </div>
+    </div>
+</section>

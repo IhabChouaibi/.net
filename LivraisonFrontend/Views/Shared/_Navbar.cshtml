@@ -1,0 +1,50 @@
+@using LivraisonFrontend.Helpers
+@inject SessionManager SessionManager
+
+<header class="topbar">
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-icon d-lg-none" type="button" data-sidebar-toggle>
+            <i class="bi bi-list"></i>
+        </button>
+        <div>
+            <p class="eyebrow mb-1">@(SessionManager.IsAdmin ? "Gestion premium des livraisons" : "Portail client premium")</p>
+            <h1 class="page-title mb-0">@ViewData["Title"]</h1>
+        </div>
+    </div>
+
+    <div class="topbar-actions">
+        <div class="dropdown">
+            <button class="btn profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="~/images/avatar-placeholder.svg" alt="Profil" class="profile-avatar" />
+                <span class="text-start">
+                    <span class="d-block fw-semibold">@(!string.IsNullOrWhiteSpace(SessionManager.FullName) ? SessionManager.FullName : SessionManager.Login)</span>
+                    <span class="text-muted small">@SessionManager.Role</span>
+                </span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 profile-menu">
+                <div class="px-3 py-2 border-bottom">
+                    <div class="fw-semibold">@SessionManager.Login</div>
+                    <div class="small text-muted">@SessionManager.FullName</div>
+                </div>
+                @if (SessionManager.IsAdmin)
+                {
+                    <a class="dropdown-item" asp-controller="Accounts" asp-action="Index">
+                        <i class="bi bi-person-gear me-2"></i>Comptes
+                    </a>
+                }
+                else
+                {
+                    <a class="dropdown-item" asp-controller="Profil" asp-action="Index">
+                        <i class="bi bi-person me-2"></i>Mon profil
+                    </a>
+                }
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>

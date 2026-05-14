@@ -1,0 +1,23 @@
+@model RegisterViewModel
+
+<section class="surface-panel">
+    <div class="panel-header"><div><p class="eyebrow mb-1">Administration</p><h2 class="section-title">Créer un compte client</h2></div></div>
+    <form asp-action="Create" method="post" class="row g-3">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+        <div class="col-md-6"><label asp-for="Nom" class="form-label"></label><input asp-for="Nom" class="form-control" /><span asp-validation-for="Nom" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Prenom" class="form-label"></label><input asp-for="Prenom" class="form-control" /><span asp-validation-for="Prenom" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Telephone" class="form-label"></label><input asp-for="Telephone" class="form-control" /><span asp-validation-for="Telephone" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="CIN" class="form-label"></label><input asp-for="CIN" class="form-control" /><span asp-validation-for="CIN" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Login" class="form-label"></label><input asp-for="Login" class="form-control" /><span asp-validation-for="Login" class="text-danger small"></span></div>
+        <div class="col-12"><label asp-for="Adresse" class="form-label"></label><input asp-for="Adresse" class="form-control" /><span asp-validation-for="Adresse" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Ville" class="form-label"></label><input asp-for="Ville" class="form-control" /><span asp-validation-for="Ville" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="CodePostal" class="form-label"></label><input asp-for="CodePostal" class="form-control" /><span asp-validation-for="CodePostal" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Password" class="form-label"></label><input asp-for="Password" class="form-control" /><span asp-validation-for="Password" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="ConfirmPassword" class="form-label"></label><input asp-for="ConfirmPassword" class="form-control" /><span asp-validation-for="ConfirmPassword" class="text-danger small"></span></div>
+        <div class="col-12 d-flex gap-2"><button type="submit" class="btn btn-primary">Créer le compte</button><a asp-action="Index" class="btn btn-outline-secondary">Annuler</a></div>
+    </form>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

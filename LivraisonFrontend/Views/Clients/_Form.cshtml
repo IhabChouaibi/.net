@@ -1,0 +1,44 @@
+@model ClientModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Nom" class="form-label"></label>
+        <input asp-for="Nom" class="form-control" placeholder="Nom" />
+        <span asp-validation-for="Nom" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Prenom" class="form-label"></label>
+        <input asp-for="Prenom" class="form-control" placeholder="Prénom" />
+        <span asp-validation-for="Prenom" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" placeholder="nom@client.com" />
+        <span asp-validation-for="Email" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Telephone" class="form-label"></label>
+        <input asp-for="Telephone" class="form-control" placeholder="70000000" />
+        <span asp-validation-for="Telephone" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CIN" class="form-label"></label>
+        <input asp-for="CIN" class="form-control" placeholder="12345678" />
+        <span asp-validation-for="CIN" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Ville" class="form-label"></label>
+        <input asp-for="Ville" class="form-control" placeholder="Tunis" />
+        <span asp-validation-for="Ville" class="text-danger small"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Adresse" class="form-label"></label>
+        <input asp-for="Adresse" class="form-control" placeholder="Adresse complète" />
+        <span asp-validation-for="Adresse" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CodePostal" class="form-label"></label>
+        <input asp-for="CodePostal" class="form-control" placeholder="1000" />
+        <span asp-validation-for="CodePostal" class="text-danger small"></span>
+    </div>
+</div>

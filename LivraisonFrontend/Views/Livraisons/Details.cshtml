@@ -1,0 +1,13 @@
+@model LivraisonModel
+
+<section class="surface-panel">
+    <div class="panel-header"><div><p class="eyebrow mb-1">Consultation</p><h2 class="section-title">Détails de la livraison</h2></div></div>
+    <dl class="details-grid">
+        <div><dt>Id</dt><dd>@Model.Id</dd></div>
+        <div><dt>Adresse</dt><dd>@Model.Adresse</dd></div>
+        <div><dt>Ville</dt><dd>@Model.Ville</dd></div>
+        <div><dt>Code postal</dt><dd>@Model.CodePostal</dd></div>
+        <div><dt>Colis</dt><dd>#@Model.ColisId</dd></div>
+    </dl>
+    <div class="d-flex gap-2 mt-4"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Modifier</a><a asp-action="Index" class="btn btn-outline-secondary">Retour</a></div>
+</section>

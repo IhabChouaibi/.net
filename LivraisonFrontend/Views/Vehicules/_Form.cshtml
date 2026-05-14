@@ -1,0 +1,42 @@
+@model VehiculeModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Couleur" class="form-label"></label>
+        <input asp-for="Couleur" class="form-control" placeholder="Blanc" />
+        <span asp-validation-for="Couleur" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Type" class="form-label"></label>
+        <select asp-for="Type" class="form-select">
+            <option value="Camion">Camion</option>
+            <option value="Voiture">Voiture</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Marque" class="form-label"></label>
+        <input asp-for="Marque" class="form-control" placeholder="Volvo" />
+        <span asp-validation-for="Marque" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Matricule" class="form-label"></label>
+        <input asp-for="Matricule" class="form-control" placeholder="TU-1234" />
+        <span asp-validation-for="Matricule" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="VitesseLimite" class="form-label"></label>
+        <input asp-for="VitesseLimite" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Capacite" class="form-label"></label>
+        <input asp-for="Capacite" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="NbrEssieux" class="form-label"></label>
+        <input asp-for="NbrEssieux" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="NbrPlaces" class="form-label"></label>
+        <input asp-for="NbrPlaces" class="form-control" />
+    </div>
+</div>

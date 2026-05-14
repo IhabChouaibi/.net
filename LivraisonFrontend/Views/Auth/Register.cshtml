@@ -1,0 +1,96 @@
+@model RegisterViewModel
+
+<section class="auth-page">
+    <div class="auth-showcase">
+        <p class="eyebrow text-white-50">Inscription client</p>
+        <h1 class="auth-hero-title">Créez votre espace client et suivez vos livraisons en temps réel.</h1>
+        <p class="auth-hero-copy">
+            Chaque inscription crée automatiquement un compte avec le rôle <strong>User</strong> et un profil client lié.
+        </p>
+        <div class="auth-feature-list">
+            <div class="auth-feature"><i class="bi bi-person-vcard"></i><span>Profil client complet</span></div>
+            <div class="auth-feature"><i class="bi bi-box-seam"></i><span>Suivi colis personnel</span></div>
+            <div class="auth-feature"><i class="bi bi-shield-check"></i><span>Authentification JWT sécurisée</span></div>
+        </div>
+    </div>
+
+    <div class="auth-card-panel surface-panel">
+        <div class="mb-4">
+            <p class="eyebrow mb-2">Bienvenue</p>
+            <h2 class="section-title mb-2">Créer un compte client</h2>
+            <p class="text-muted mb-0">Les informations ci-dessous servent à créer le compte et le profil client associé.</p>
+        </div>
+
+        <form asp-controller="Auth" asp-action="Register" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+            <div class="col-md-6">
+                <label asp-for="Nom" class="form-label"></label>
+                <input asp-for="Nom" class="form-control" placeholder="Nom" />
+                <span asp-validation-for="Nom" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Prenom" class="form-label"></label>
+                <input asp-for="Prenom" class="form-control" placeholder="Prénom" />
+                <span asp-validation-for="Prenom" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="nom@exemple.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Telephone" class="form-label"></label>
+                <input asp-for="Telephone" class="form-control" placeholder="70000000" />
+                <span asp-validation-for="Telephone" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CIN" class="form-label"></label>
+                <input asp-for="CIN" class="form-control" placeholder="12345678" />
+                <span asp-validation-for="CIN" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Login" class="form-label"></label>
+                <input asp-for="Login" class="form-control" placeholder="login client" />
+                <span asp-validation-for="Login" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Adresse" class="form-label"></label>
+                <input asp-for="Adresse" class="form-control" placeholder="Adresse complète" />
+                <span asp-validation-for="Adresse" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Ville" class="form-label"></label>
+                <input asp-for="Ville" class="form-control" placeholder="Ville" />
+                <span asp-validation-for="Ville" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CodePostal" class="form-label"></label>
+                <input asp-for="CodePostal" class="form-control" placeholder="1000" />
+                <span asp-validation-for="CodePostal" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" placeholder="Mot de passe" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirmer le mot de passe" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12 d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-person-plus me-2"></i>Créer mon compte client
+                </button>
+                <a asp-action="Login" class="btn btn-outline-secondary">Déjà inscrit ? Se connecter</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

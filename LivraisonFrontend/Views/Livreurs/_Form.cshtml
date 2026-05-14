@@ -1,0 +1,24 @@
+@model LivreurModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="CIN" class="form-label"></label>
+        <input asp-for="CIN" class="form-control" placeholder="12345678" />
+        <span asp-validation-for="CIN" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="RaisonSocial" class="form-label"></label>
+        <input asp-for="RaisonSocial" class="form-control" placeholder="Express Nord" />
+        <span asp-validation-for="RaisonSocial" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Ville" class="form-label"></label>
+        <input asp-for="Ville" class="form-control" placeholder="Tunis" />
+        <span asp-validation-for="Ville" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CodePostal" class="form-label"></label>
+        <input asp-for="CodePostal" class="form-control" placeholder="1000" />
+        <span asp-validation-for="CodePostal" class="text-danger small"></span>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+@model LivraisonFrontend.ViewModels.SuiviColisItemViewModel
+
+<section class="surface-panel">
+    <div class="panel-header flex-wrap gap-3">
+        <div>
+            <p class="eyebrow mb-1">Détails colis</p>
+            <h2 class="section-title">Colis #@Model.Id</h2>
+        </div>
+        <partial name="_StatusBadge" model="Model.Statut" />
+    </div>
+
+    <div class="tracking-timeline mb-4">
+        @{
+            var steps = new[] { "En attente", "En cours", "Livré", "Annulé" };
+        }
+        @foreach (var step in steps)
+        {
+            var isActive = string.Equals(Model.Statut, step, StringComparison.OrdinalIgnoreCase);
+            <div class="timeline-step @(isActive ? "active" : "") @(step == "Annulé" && isActive ? "danger" : "")">
+                <span class="timeline-dot"></span>
+                <span>@step</span>
+            </div>
+        }
+    </div>
+
+    <dl class="details-grid">
+        <div><dt>Libellé</dt><dd>@Model.Libelle</dd></div>
+        <div><dt>Date livraison</dt><dd>@Model.DateLivraison:dd/MM/yyyy</dd></div>
+        <div><dt>Montant</dt><dd>@Model.Montant.ToString("0.00") TND</dd></div>
+        <div><dt>Poids</dt><dd>@Model.Poids.ToString("0.##") kg</dd></div>
+        <div><dt>Volume</dt><dd>@Model.Volume.ToString("0.###") m³</dd></div>
+        <div><dt>Adresse livraison</dt><dd>@Model.Adresse</dd></div>
+        <div><dt>Ville</dt><dd>@Model.Ville</dd></div>
+        <div><dt>Code postal</dt><dd>@Model.CodePostal</dd></div>
+        <div><dt>Statut</dt><dd>@Model.Statut</dd></div>
+    </dl>
+
+    <div class="d-flex justify-content-end mt-4">
+        <a asp-action="MesColis" class="btn btn-outline-secondary">Retour</a>
+    </div>
+</section>

@@ -1,0 +1,88 @@
+@using LivraisonFrontend.Helpers
+@inject SessionManager SessionManager
+
+<aside class="sidebar" id="appSidebar">
+    <div class="sidebar-brand">
+        <a asp-controller="@(SessionManager.IsAdmin ? "Dashboard" : "SuiviColis")" asp-action="Index" class="brand-link">
+            <img src="~/images/logo-mark.svg" alt="Logo" class="brand-logo" />
+            <div>
+                <div class="brand-title">Livraison Suite</div>
+                <div class="brand-subtitle">Premium Workspace</div>
+            </div>
+        </a>
+    </div>
+
+    <nav class="sidebar-nav">
+        @if (SessionManager.IsAdmin)
+        {
+            <a asp-controller="Dashboard" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-grid-1x2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a asp-controller="Clients" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-people"></i>
+                <span>Clients</span>
+            </a>
+            <a asp-controller="Livreurs" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-person-badge"></i>
+                <span>Livreurs</span>
+            </a>
+            <a asp-controller="Colis" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-box-seam"></i>
+                <span>Colis</span>
+            </a>
+            <a asp-controller="Vehicules" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-truck"></i>
+                <span>Véhicules</span>
+            </a>
+            <a asp-controller="Paiements" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-credit-card"></i>
+                <span>Paiements</span>
+            </a>
+            <a asp-controller="Livraisons" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-geo-alt"></i>
+                <span>Livraisons</span>
+            </a>
+            <a asp-controller="Accounts" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-shield-lock"></i>
+                <span>Comptes</span>
+            </a>
+            <form asp-controller="Auth" asp-action="Logout" method="post" class="sidebar-logout">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link-premium nav-link-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="SuiviColis" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-radar"></i>
+                <span>Suivi colis</span>
+            </a>
+            <a asp-controller="SuiviColis" asp-action="MesColis" class="nav-link-premium">
+                <i class="bi bi-box-seam"></i>
+                <span>Mes colis</span>
+            </a>
+            <a asp-controller="Profil" asp-action="Index" class="nav-link-premium">
+                <i class="bi bi-person-circle"></i>
+                <span>Mon profil</span>
+            </a>
+            <form asp-controller="Auth" asp-action="Logout" method="post" class="sidebar-logout">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link-premium nav-link-button">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        }
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="status-pill">
+            <span class="status-dot"></span>
+            <span>@(SessionManager.IsAdmin ? "Mode administration" : "Espace client")</span>
+        </div>
+    </div>
+</aside>

@@ -1,0 +1,25 @@
+@model PaiementModel
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Montant" class="form-label"></label>
+        <input asp-for="Montant" class="form-control" />
+        <span asp-validation-for="Montant" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ModePaiement" class="form-label"></label>
+        <select asp-for="ModePaiement" class="form-select">
+            <option>Carte</option>
+            <option>Virement</option>
+            <option>Especes</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ColisId" class="form-label"></label>
+        <input asp-for="ColisId" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="DatePaiement" class="form-label"></label>
+        <input asp-for="DatePaiement" type="date" class="form-control" />
+    </div>
+</div>

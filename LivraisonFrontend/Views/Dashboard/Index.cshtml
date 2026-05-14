@@ -1,0 +1,238 @@
+@model DashboardViewModel
+@using System.Text.Json
+@{
+    var statusLabels = Model.PackageStatusChart.Select(item => item.Label).ToList();
+    var statusValues = Model.PackageStatusChart.Select(item => item.Value).ToList();
+    var paymentLabels = Model.PaymentByMonthChart.Select(item => item.Label).ToList();
+    var paymentValues = Model.PaymentByMonthChart.Select(item => item.Value).ToList();
+}
+
+<section class="dashboard-grid">
+    <div class="stat-card">
+        <div class="stat-icon bg-primary-subtle text-primary"><i class="bi bi-people"></i></div>
+        <div>
+            <p class="stat-label">Total clients</p>
+            <h3 class="stat-value">@Model.TotalClients</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-success-subtle text-success"><i class="bi bi-person-badge"></i></div>
+        <div>
+            <p class="stat-label">Total livreurs</p>
+            <h3 class="stat-value">@Model.TotalLivreurs</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-warning-subtle text-warning"><i class="bi bi-box-seam"></i></div>
+        <div>
+            <p class="stat-label">Total colis</p>
+            <h3 class="stat-value">@Model.TotalColis</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-info-subtle text-info"><i class="bi bi-cash-stack"></i></div>
+        <div>
+            <p class="stat-label">Montant total</p>
+            <h3 class="stat-value">@Model.TotalRevenue.ToString("N2") DT</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-success-subtle text-success"><i class="bi bi-check-circle"></i></div>
+        <div>
+            <p class="stat-label">Colis livrés</p>
+            <h3 class="stat-value">@Model.DeliveredPackages</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-danger-subtle text-danger"><i class="bi bi-clock-history"></i></div>
+        <div>
+            <p class="stat-label">Colis en attente</p>
+            <h3 class="stat-value">@Model.PendingPackages</h3>
+        </div>
+    </div>
+</section>
+
+<section class="content-grid mt-4">
+    <div class="surface-panel chart-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow mb-1">Statistiques</p>
+                <h2 class="section-title">Colis par statut</h2>
+            </div>
+        </div>
+        <canvas id="packageStatusChart" height="220"></canvas>
+    </div>
+
+    <div class="surface-panel chart-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow mb-1">Finance</p>
+                <h2 class="section-title">Paiements par mois</h2>
+            </div>
+        </div>
+        <canvas id="paymentChart" height="220"></canvas>
+    </div>
+</section>
+
+<section class="content-grid mt-4">
+    <div class="surface-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow mb-1">Livraisons</p>
+                <h2 class="section-title">Dernières livraisons</h2>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table premium-table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Tracking</th>
+                    <th>Livreur</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.LatestDeliveries.Any())
+                {
+                    @foreach (var item in Model.LatestDeliveries)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.TrackingNumber</td>
+                            <td>@item.DriverName</td>
+                            <td><partial name="_StatusBadge" model="item.Status" /></td>
+                            <td>@item.ScheduledDate.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-4">Aucune livraison récente.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="surface-panel">
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow mb-1">Clients</p>
+                <h2 class="section-title">Derniers clients</h2>
+            </div>
+        </div>
+        <div class="list-stack">
+            @if (Model.LatestClients.Any())
+            {
+                @foreach (var item in Model.LatestClients)
+                {
+                    <div class="list-row">
+                        <div class="avatar-badge">@item.FullName[..1]</div>
+                        <div>
+                            <div class="fw-semibold">@item.FullName</div>
+                            <div class="small text-muted">@item.Email</div>
+                        </div>
+                        <div class="small text-muted ms-auto">@item.CreatedAt.ToString("dd/MM/yyyy")</div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-muted">Aucun client récent.</div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="surface-panel mt-4">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow mb-1">Activité</p>
+            <h2 class="section-title">Activité récente</h2>
+        </div>
+    </div>
+
+    <div class="activity-feed">
+        @if (Model.RecentActivities.Any())
+        {
+            @foreach (var item in Model.RecentActivities)
+            {
+                <div class="activity-item">
+                    <div class="activity-dot"></div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h3 class="h6 mb-0">@item.Title</h3>
+                            <partial name="_StatusBadge" model="item.Status" />
+                        </div>
+                        <p class="text-muted mb-1">@item.Description</p>
+                        <span class="small text-muted">@item.Date.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted mb-0">Aucune activité récente disponible.</p>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const statusLabels = @Html.Raw(JsonSerializer.Serialize(statusLabels));
+            const statusValues = @Html.Raw(JsonSerializer.Serialize(statusValues));
+            const paymentLabels = @Html.Raw(JsonSerializer.Serialize(paymentLabels));
+            const paymentValues = @Html.Raw(JsonSerializer.Serialize(paymentValues));
+
+            if (document.getElementById("packageStatusChart")) {
+                new Chart(document.getElementById("packageStatusChart"), {
+                    type: "doughnut",
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusValues,
+                            backgroundColor: ["#2563eb", "#0f766e", "#d97706", "#dc2626", "#7c3aed"]
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: "bottom"
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById("paymentChart")) {
+                new Chart(document.getElementById("paymentChart"), {
+                    type: "line",
+                    data: {
+                        labels: paymentLabels,
+                        datasets: [{
+                            label: "Paiements",
+                            data: paymentValues,
+                            borderColor: "#0f766e",
+                            backgroundColor: "rgba(15, 118, 110, 0.15)",
+                            fill: true,
+                            tension: 0.35
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

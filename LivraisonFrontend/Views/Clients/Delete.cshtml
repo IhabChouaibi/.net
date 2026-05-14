@@ -1,0 +1,26 @@
+@model ClientModel
+
+<section class="surface-panel">
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow mb-1">Suppression</p>
+            <h2 class="section-title">Supprimer le client</h2>
+        </div>
+    </div>
+
+    <p class="text-muted">Cette action supprimera définitivement ce client.</p>
+    <dl class="details-grid mb-4">
+        <div><dt>Nom</dt><dd>@Model.Nom</dd></div>
+        <div><dt>Prénom</dt><dd>@Model.Prenom</dd></div>
+        <div><dt>Email</dt><dd>@Model.Email</dd></div>
+        <div><dt>Téléphone</dt><dd>@Model.Telephone</dd></div>
+        <div><dt>Ville</dt><dd>@Model.Ville</dd></div>
+        <div><dt>Code postal</dt><dd>@Model.CodePostal</dd></div>
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm-delete>
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+    </form>
+</section>

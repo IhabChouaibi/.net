@@ -1,0 +1,9 @@
+@using LivraisonFrontend.Helpers
+@inject SessionManager SessionManager
+
+<section class="error-panel">
+    <div class="error-icon"><i class="bi bi-shield-x"></i></div>
+    <h1>Accès refusé</h1>
+    <p>Votre rôle actuel ne permet pas d'accéder à cette ressource.</p>
+    <a asp-controller="@(SessionManager.IsAdmin ? "Dashboard" : "SuiviColis")" asp-action="Index" class="btn btn-primary">Retour à l'application</a>
+</section>

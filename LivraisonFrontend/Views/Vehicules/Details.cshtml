@@ -1,0 +1,19 @@
+@model VehiculeModel
+
+<section class="surface-panel">
+    <div class="panel-header"><div><p class="eyebrow mb-1">Consultation</p><h2 class="section-title">Détails du véhicule</h2></div></div>
+    <dl class="details-grid">
+        <div><dt>Couleur</dt><dd>@Model.Couleur</dd></div>
+        <div><dt>Marque</dt><dd>@Model.Marque</dd></div>
+        <div><dt>Matricule</dt><dd>@Model.Matricule</dd></div>
+        <div><dt>Type</dt><dd>@Model.Type</dd></div>
+        <div><dt>Vitesse limite</dt><dd>@Model.VitesseLimite km/h</dd></div>
+        <div><dt>Capacité</dt><dd>@Model.Capacite</dd></div>
+        <div><dt>Essieux</dt><dd>@Model.NbrEssieux</dd></div>
+        <div><dt>Places</dt><dd>@Model.NbrPlaces</dd></div>
+    </dl>
+    <div class="d-flex gap-2 mt-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Modifier</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Retour</a>
+    </div>
+</section>

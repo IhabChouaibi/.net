@@ -1,0 +1,13 @@
+@model PaiementModel
+
+<section class="surface-panel">
+    <div class="panel-header"><div><p class="eyebrow mb-1">Consultation</p><h2 class="section-title">Détails du paiement</h2></div></div>
+    <dl class="details-grid">
+        <div><dt>Id</dt><dd>@Model.Id</dd></div>
+        <div><dt>Montant</dt><dd>@Model.Montant.ToString("N2") DT</dd></div>
+        <div><dt>Mode</dt><dd>@Model.ModePaiement</dd></div>
+        <div><dt>Colis</dt><dd>#@Model.ColisId</dd></div>
+        <div><dt>Date</dt><dd>@Model.DatePaiement.ToString("dd/MM/yyyy")</dd></div>
+    </dl>
+    <div class="d-flex gap-2 mt-4"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Modifier</a><a asp-action="Index" class="btn btn-outline-secondary">Retour</a></div>
+</section>

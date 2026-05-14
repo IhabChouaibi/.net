@@ -1,0 +1,43 @@
+@model PaiementModel
+
+<section class="surface-panel">
+
+    <div class="panel-header">
+        <div>
+            <p class="eyebrow mb-1">Suppression</p>
+            <h2 class="section-title">Supprimer le paiement</h2>
+        </div>
+    </div>
+
+    <p class="text-muted">
+        Confirmez uniquement si le paiement doit être retiré du suivi.
+    </p>
+
+    <dl class="details-grid mb-4">
+
+        <dt>Montant</dt>
+        <dd>@Model.Montant.ToString("N2") DT</dd>
+
+        <dt>Mode</dt>
+        <dd>@Model.ModePaiement</dd>
+
+        <dt>Colis</dt>
+        <dd>#@Model.ColisId</dd>
+
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm-delete>
+
+        @Html.AntiForgeryToken()
+
+        <button type="submit" class="btn btn-danger">
+            Confirmer la suppression
+        </button>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Annuler
+        </a>
+
+    </form>
+
+</section>
